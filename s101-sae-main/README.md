@@ -23,7 +23,7 @@ les Noirs (N) en haut. Les Blancs jouent en premier.
 - ou son adversaire n'a plus aucun pion
 - ou son adversaire ne peut plus jouer aucun coup
 
-Il n'y a donc pas de match nul à Breakthrough
+Il n'y a donc pas de match nul à Breakthrough.
 
 Déroulement d'une partie :
 
