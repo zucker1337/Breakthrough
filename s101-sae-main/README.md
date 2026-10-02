@@ -4,7 +4,7 @@ Jeu de plateau à deux joueurs, ou un joueur contre l'ordinateur : chaque camp f
 
 **Groupe** : `G02` -- Mohammad Epifanov, Solomon Fashanu Timileyin, Chaima Gabtni
 
-# Description
+## Description
 
 Breakthrough se joue sur un plateau de 8 × 8 cases. Chaque joueur commence
 avec 16 pions placés sur ses deux premières rangées : les Blancs (B) en bas,
@@ -17,7 +17,7 @@ les Noirs (N) en haut. Les Blancs jouent en premier.
 - Un pion avance en diagonale sur une case vide, ou sur une case occupée par un pion adverse qui est alors "mangé" (retiré du plateau)
 - On ne prend jamais tout droit et on ne recule jamais
 
-! Fin de partie : un joueur gagne dès que :
+**Fin de partie** : un joueur gagne dès que :
 
 - l'un de ses pions atteint la dernière rangée adverse
 - ou son adversaire n'a plus aucun pion
@@ -73,7 +73,7 @@ Représentation du plateau : un tableau `int plateau[TAILLE][TAILLE]` où `0` =
 case vide, `1` = pion blanc, `2` = pion noir. Les Blancs (joueur 1) avancent
 vers la ligne 0, les Noirs (joueur 2) vers la ligne `TAILLE - 1`.
 
-
+```
 main
 ├── void afficherRegles()
 ├── int choisirMode()                                  (1 = 2 joueurs, 2 = contre l'ordinateur)
@@ -100,7 +100,7 @@ main
 │   └── int adversaire(int joueur)
 ├── void afficherGagnant(int joueur)
 └── bool demanderRejouer()
-
+```
 
 ## Organisation du projet
 
