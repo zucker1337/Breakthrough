@@ -8,19 +8,24 @@
 #include <stdio.h>
 
 #include "./lib/exemple.h"
+
+// taille variable du tableau
+#define TAILLE 8
+
 void deuxJoueurs();
 void afficherRegles();
-int plateau(int mat[8][8]);
+int plateau(int mat[TAILLE][TAILLE]);
 
 int main() {
   // afficheSep est déclarée dans lib/exemple.h et définie dans lib/exemple.c
    afficheSep();
 
-  
-  int choix, mat[8][8];
+
+  int choix, mat[TAILLE][TAILLE];
   puts("Choisir un mode: 1. Pour 2 joueurs, 2. Contre l'ordinateur. ");
   scanf("%d", &choix);
   afficherRegles();
+  
   switch (choix) {
     case 1:
       deuxJoueurs();
@@ -43,9 +48,9 @@ void afficherRegles() {
       "vide, ou sur une case occupée par un pion adverse qui est alors eliminé "
       "(retiré du plateau)\nOn ne prend jamais tout droit et on ne recule "
       "jamais\n");
-} 
+}
 
-int plateau(int mat[8][8]) {
+int plateau(int mat[TAILLE][TAILLE]) {
 
 
 
@@ -53,25 +58,25 @@ int plateau(int mat[8][8]) {
   char Colonnelettre = 'A';
 
   printf("   ");
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < TAILLE; i++) {
     printf("  %c", Colonnelettre);
     Colonnelettre++;
   }
-  
+
   printf("\n");
 
 
 
   // affiche le tableau avec les 0 ainsi que les index des lignes
-  int Ligne = 8;
+  int Ligne = TAILLE;
 
   printf("\n");
-  for (int ligne = 0; ligne < 8; ligne++) {
-    
+  for (int ligne = 0; ligne < TAILLE; ligne++) {
+
 
     printf("%d    ", Ligne);
 
-    for (int colonne = 0; colonne < 8; colonne++) {
+    for (int colonne = 0; colonne < TAILLE; colonne++) {
 
       mat[ligne][colonne] = 0;
 
@@ -79,7 +84,7 @@ int plateau(int mat[8][8]) {
 
     }
 
-    // index de la ligne répété à droite
+    // index de la ligne à droite
     printf("  %d", Ligne);
     Ligne--;
 
@@ -93,16 +98,17 @@ int plateau(int mat[8][8]) {
   char LigneBas = 'A';
 
   printf("   ");
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < TAILLE; i++) {
     printf("  %c", LigneBas);
     LigneBas++;
   }
-  
+
   printf("\n");
-  
+
 
   return 0;
 }
+
 
 void deuxJoueurs() {
   char nom1[20], nom2[20];
@@ -111,4 +117,3 @@ void deuxJoueurs() {
   puts("Entrez votre nom joueur 2");
   scanf("%s", nom2);
 }
-
