@@ -4,23 +4,25 @@
  * du dossier lib/.
  */
 
-
 #include <stdio.h>
 
 #include "./lib/exemple.h"
-
+void joueur1();
+void joueur2();
 void afficherRegles();
 int plateau(int mat[8][8]);
 
 int main() {
   // afficheSep est déclarée dans lib/exemple.h et définie dans lib/exemple.c
-   afficheSep();
+  afficheSep();
 
-  
   int choix, mat[8][8];
   puts("Choisir un mode: 1. Pour 2 joueurs, 2. Contre l'ordinateur. ");
   scanf("%d", &choix);
+
   afficherRegles();
+  joueur1();
+  joueur2();
   plateau(mat);
   afficheSep();
 
@@ -46,4 +48,16 @@ int plateau(int mat[8][8]) {
     printf("\n");
   }
   return 0;
+}
+
+void joueur1() {
+  char nom1;
+  puts("Entrez votre nom");
+  scanf("%s", &nom1);
+}
+
+void joueur2() {
+  char nom2;
+  puts("Entrez votre nom");
+  scanf("%s", &nom2);
 }
