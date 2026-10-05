@@ -21,9 +21,9 @@ int main() {
   scanf("%d", &choix);
 
   afficherRegles();
-  joueur1();
-  joueur2();
   plateau(mat);
+    joueur1();
+  joueur2();
   afficheSep();
 
   return 0;
