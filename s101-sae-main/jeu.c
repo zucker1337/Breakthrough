@@ -44,9 +44,9 @@ int plateau(int mat[8][8]) {
   // pour afficher les index des cases en lettre EN HAUT
   char Colonnelettre = 'A';
 
-  printf("  ");
+  printf("   ");
   for (int i = 0; i < 8; i++) {
-    printf("%c ", Colonnelettre);
+    printf("  %c", Colonnelettre);
     Colonnelettre++;
   }
   
@@ -57,16 +57,18 @@ int plateau(int mat[8][8]) {
   // affiche le tableau avec les 0 ainsi que les index des lignes
   int Ligne = 8;
 
+  printf("\n");
   for (int ligne = 0; ligne < 8; ligne++) {
+    
 
-    printf("%d ", Ligne);
+    printf("%d    ", Ligne);
     Ligne--;
 
     for (int colonne = 0; colonne < 8; colonne++) {
 
       mat[ligne][colonne] = 0;
       
-      printf("%d ", mat[ligne][colonne]);
+      printf("%d  ", mat[ligne][colonne]);
 
     }
 
@@ -76,12 +78,14 @@ int plateau(int mat[8][8]) {
 
 
 
+
+  printf("\n");
   // pour afficher les index des cases en lettre EN BAS
   char LigneBas = 'A';
 
-  printf("  ");
+  printf("   ");
   for (int i = 0; i < 8; i++) {
-    printf("%c ", LigneBas);
+    printf("  %c", LigneBas);
     LigneBas++;
   }
   
