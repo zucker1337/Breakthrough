@@ -62,20 +62,21 @@ int plateau(int mat[8][8]) {
     
 
     printf("%d    ", Ligne);
-    Ligne--;
 
     for (int colonne = 0; colonne < 8; colonne++) {
 
       mat[ligne][colonne] = 0;
-      
+
       printf("%d  ", mat[ligne][colonne]);
 
     }
 
+    // index de la ligne répété à droite
+    printf("  %d", Ligne);
+    Ligne--;
+
     printf("\n");
   }
-
-
 
 
 
