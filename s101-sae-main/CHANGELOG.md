@@ -10,10 +10,7 @@ réalisé à plusieurs cite tous ses auteurs : `(@prénom1, @prénom2)`.
 
 ### Ajouté
 
-* Choix du jeu : Breakthrough (@Mohammad, @Solomon, @Chaima).
-* Règles du jeu et déroulement d'une partie décrits dans le `README.md` (@Mohammad, @Solomon, @Chaima).
-* Choix de la représentation du plateau : tableau 2D d'entiers (@Mohammad, @Solomon, @Chaima).
-* Schéma de décomposition du programme dans le `README.md` (@Mohammad, @Solomon, @Chaima).
+- [ex: choix du jeu, schéma de décomposition] (@prénom1, @prénom2, @prénom3)
 
 <!--
 Dupliquez ce gabarit chaque semaine, en l'ajoutant tout en haut du fichier
@@ -33,6 +30,4 @@ utiles à la semaine concernée.
 ### Corrigé
 
 - ... (@prénom)
-
-
 -->

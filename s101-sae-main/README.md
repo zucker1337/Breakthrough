@@ -1,114 +1,53 @@
-# Breakthrough
+# [BREAKTHROUGH]
 
-Jeu de plateau à deux joueurs, ou un joueur contre l'ordinateur : chaque camp fait avancer ses pions vers le camp adverse, le premier qui atteint la dernière rangée adverse gagne.
+> 
 
-**Groupe** : `G02` -- Mohammad Epifanov, Solomon Fashanu Timileyin, Chaima Gabtni
+> Jeu de BREAKTHROUGH est un jeu de stratégie abstrait pour deux joueurs, il ressemble énormement au jeux des Dames.  Chaque joueur déplace une pièce par coup. Une pièce peut être déplacée d'une case vers l'avant, tout droit ou en diagonale, si la case d'arrivée est vide. Une pièce peut aussi être déplacée vers une case occupée par une pièce adverse, si la case d'arrivée se trouve à une case en diagonale et en avant.   [reprenez le
+> brief client de l'onglet « Sujet ».]
+
+**Groupe** : Solomon FASHANU, Mohammad EPIFANOV, Chaima GABTNI
 
 ## Description
 
-Breakthrough se joue sur un plateau de 8 × 8 cases. Chaque joueur commence
-avec 16 pions placés sur ses deux premières rangées : les Blancs (B) en bas,
-les Noirs (N) en haut. Les Blancs jouent en premier.
-
-**Règles** :
-
-- A son tour, un joueur déplace un de ses pions d'une case vers l'avant : tout droit ou en diagonale
-- Un pion avance tout droit uniquement si la case d'arrivée est vide
-- Un pion avance en diagonale sur une case vide, ou sur une case occupée par un pion adverse qui est alors "mangé" (retiré du plateau)
-- On ne prend jamais tout droit et on ne recule jamais
-
-**Fin de partie** : un joueur gagne dès que :
-
-- l'un de ses pions atteint la dernière rangée adverse
-- ou son adversaire n'a plus aucun pion
-- ou son adversaire ne peut plus jouer aucun coup
-
-Il n'y a donc pas de match nul à Breakthrough.
-
-Déroulement d'une partie :
-
-1. Le programme affiche les règles puis demande le mode : deux joueurs ou
-   contre l'ordinateur
-2. A chaque tour le plateau est affiché et le joueur saisit son coup sous la
-   forme case_depart case_arrivee, par exemple "B2 B3", un coup invalide
-   (hors plateau, pas son pion, mauvaise direction, case occupée...) est
-   refusé avec un message explicatif et le joueur rejoue le coup
-3. Quand un joueur gagne le programme l'annonce et propose de rejouer
-
-Exemple d'affichage :
-
-    A B C D E F G H
-  8 N N N N N N N N 8
-  7 N N N N N N N N 7
-  6 . . . . . . . . 6
-  5 . . . . . . . . 5
-  4 . . . . . . . . 4
-  3 . . . . . . . . 3
-  2 B B B B B B B B 2
-  1 B B B B B B B B 1
-    A B C D E F G H
-
-Joueur Blanc, votre coup (ex : B2 B3) 
-
-Adversaire automatique : [à compléter -- stratégie(s) réalisée(s)].
-
-**Fonctionnalités valorisées** : [à compléter au fil du projet -- ex : taille
-de plateau paramétrable, historique des coups, scores sur plusieurs parties].
-
+Breakthrough est un jeu de stratégie de plateau créé par Dan Troyka en 2000. Il gagna le concours du meilleur design de jeu de plateau 8x8, et il a quelques similitudes avec les Dames, mais la stratégie est différente. 
+La partie se joue sur un plateau carré de 8x8 cases avec des pièces blanches et noires. Le but du jeu est d'atteindre la rangée de départ de l'adversaire, la plus éloignée du joueur. Cela signifie que le joueur blanc doit atteindre la 8e rangée et que le joueur noir doit atteindre la 1ère rangée pour gagner la partie.
 ## Compilation et exécution
 
 Sous VSCode, la touche `F5` compile le fichier actif (`jeu.c`) avec tous les
 modules du dossier `lib/` et lance l'exécutable.
 
 En ligne de commande :
-
+S
 ```bash
+# TODO: adaptez si votre point d'entrée ou vos options de compilation changent
 gcc -std=c23 -Wall -Werror jeu.c lib/*.c -o jeu -lm
 ./jeu
 ```
 
+[Précisez ici toute dépendance ou option particulière propre à votre projet :
+bibliothèque externe, arguments de lancement, mode de jeu...]
+
 ## Schéma de décomposition
 
-Représentation du plateau : un tableau `int plateau[TAILLE][TAILLE]` où `0` =
-case vide, `1` = pion blanc, `2` = pion noir. Les Blancs (joueur 1) avancent
-vers la ligne 0, les Noirs (joueur 2) vers la ligne `TAILLE - 1`.
+[Remplacez l'arbre ci-dessous par celui de votre jeu : une ligne par
+fonction, avec sa signature, décalée sous la fonction qui l'appelle. Mettez-le
+à jour si votre découpage en fonctions évolue.]
 
 ```
 main
-├── void afficherRegles()
-├── int choisirMode()                                  (1 = 2 joueurs, 2 = contre l'ordinateur)
-├── int jouerPartie(int mode)                          (renvoie le numéro du gagnant)
-│   ├── void initialiserPlateau(int plateau[TAILLE][TAILLE])
-│   ├── void afficherPlateau(int plateau[TAILLE][TAILLE])
-│   ├── void saisirCoup(int plateau[TAILLE][TAILLE], int joueur,
-│   │                   int *ligDep, int *colDep, int *ligArr, int *colArr)
-│   │   ├── bool lireCase(int *lig, int *col)          (scanf d'une case type "B2", conversion lettre/chiffre)
-│   │   └── bool estCoupValide(int plateau[TAILLE][TAILLE], int joueur,
-│   │                          int ligDep, int colDep, int ligArr, int colArr)
-│   │       ├── bool estDansPlateau(int lig, int col)
-│   │       └── int direction(int joueur)              (-1 pour les Blancs, +1 pour les Noirs)
-│   ├── void choisirCoupOrdinateur(int plateau[TAILLE][TAILLE], int joueur,
-│   │                              int *ligDep, int *colDep, int *ligArr, int *colArr)
-│   │   └── bool estCoupValide(...)
-│   ├── void jouerCoup(int plateau[TAILLE][TAILLE],
-│   │                  int ligDep, int colDep, int ligArr, int colArr)
-│   ├── int gagnant(int plateau[TAILLE][TAILLE], int joueurSuivant)   (0 si la partie continue)
-│   │   ├── bool aAtteintDerniereRangee(int plateau[TAILLE][TAILLE], int joueur)
-│   │   ├── int compterPions(int plateau[TAILLE][TAILLE], int joueur)
-│   │   └── bool peutJouer(int plateau[TAILLE][TAILLE], int joueur)
-│   │       └── bool estCoupValide(...)
-│   └── int adversaire(int joueur)
-├── void afficherGagnant(int joueur)
-└── bool demanderRejouer()
+├── [type nomFonction(paramètres)]
+│   ├── [type sousFonction(paramètres)]
+│   └── [...]
+└── [...]
 ```
 
 ## Organisation du projet
 
-[À compléter quand le code sera réparti en modules dans `lib/`.]
+[Décrivez vos modules du dossier `lib/` et leur responsabilité.]
 
 | Fichier | Rôle |
 | --- | --- |
-| `jeu.c` | point d'entrée : menu, boucle des parties, rejouer |
+| `jeu.c` | [point d'entrée du jeu] |
 | `lib/...` | [...] |
 
 ## Documentation
@@ -120,12 +59,15 @@ dans le dossier `html/` :
 doxygen Doxyfile
 ```
 
+[Remplacez la valeur de `PROJECT_NAME` dans le `Doxyfile` par le nom de votre
+jeu.]
+
 ## Jeux d'essais
 
 Les traces d'exécution (parties rejouées, résultats des mesures de
 comparaison) se trouvent dans le dossier `output/`.
 
-[À compléter : comment obtenir ces traces.]
+Vous devrez expliquer comment obtenir ces traces.
 
 ## Journal des changements
 
