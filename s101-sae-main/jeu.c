@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include "./lib/exemple.h"
-
+void deuxJoueurs();
 void afficherRegles();
 int plateau(int mat[8][8]);
 
@@ -21,6 +21,14 @@ int main() {
   puts("Choisir un mode: 1. Pour 2 joueurs, 2. Contre l'ordinateur. ");
   scanf("%d", &choix);
   afficherRegles();
+  switch (choix) {
+    case 1:
+      deuxJoueurs();
+      break;
+
+    default:
+      printf("Vous jouez contre l'ordinateur \n");
+  }
   plateau(mat);
   afficheSep();
 
@@ -95,3 +103,12 @@ int plateau(int mat[8][8]) {
 
   return 0;
 }
+
+void deuxJoueurs() {
+  char nom1[20], nom2[20];
+  puts("Entrez votre nom joueur 1");
+  scanf("%s", nom1);
+  puts("Entrez votre nom joueur 2");
+  scanf("%s", nom2);
+}
+
