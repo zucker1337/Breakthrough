@@ -51,13 +51,13 @@ int plateau(int mat[8][8]) {
 }
 
 void joueur1() {
-  char nom1;
-  puts("Entrez votre nom");
-  scanf("%s", &nom1);
+  char nom1[20];
+  puts("Entrez votre nom joueur 1: ");
+  scanf("%s", nom1);
 }
 
 void joueur2() {
-  char nom2;
-  puts("Entrez votre nom");
-  scanf("%s", &nom2);
+  char nom2[20];
+  puts("Entrez votre nom joueur 2: ");
+  scanf("%s", nom2);
 }
