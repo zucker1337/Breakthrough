@@ -4,26 +4,24 @@
  * du dossier lib/.
  */
 
+
 #include <stdio.h>
 
 #include "./lib/exemple.h"
-void joueur1();
-void joueur2();
+
 void afficherRegles();
 int plateau(int mat[8][8]);
 
 int main() {
   // afficheSep est déclarée dans lib/exemple.h et définie dans lib/exemple.c
-  afficheSep();
+   afficheSep();
 
+  
   int choix, mat[8][8];
   puts("Choisir un mode: 1. Pour 2 joueurs, 2. Contre l'ordinateur. ");
   scanf("%d", &choix);
-
   afficherRegles();
   plateau(mat);
-    joueur1();
-  joueur2();
   afficheSep();
 
   return 0;
@@ -37,27 +35,58 @@ void afficherRegles() {
       "vide, ou sur une case occupée par un pion adverse qui est alors eliminé "
       "(retiré du plateau)\nOn ne prend jamais tout droit et on ne recule "
       "jamais\n");
-}
+} 
 
 int plateau(int mat[8][8]) {
+
+
+
+  // pour afficher les index des cases en lettre EN HAUT
+  char Colonnelettre = 'A';
+
+  printf("  ");
+  for (int i = 0; i < 8; i++) {
+    printf("%c ", Colonnelettre);
+    Colonnelettre++;
+  }
+  
+  printf("\n");
+
+
+
+  // affiche le tableau avec les 0 ainsi que les index des lignes
+  int Ligne = 8;
+
   for (int ligne = 0; ligne < 8; ligne++) {
+
+    printf("%d ", Ligne);
+    Ligne--;
+
     for (int colonne = 0; colonne < 8; colonne++) {
+
       mat[ligne][colonne] = 0;
-      printf("%d", mat[ligne][colonne]);
+      
+      printf("%d ", mat[ligne][colonne]);
+
     }
+
     printf("\n");
   }
+
+
+
+
+  // pour afficher les index des cases en lettre EN BAS
+  char LigneBas = 'A';
+
+  printf("  ");
+  for (int i = 0; i < 8; i++) {
+    printf("%c ", LigneBas);
+    LigneBas++;
+  }
+  
+  printf("\n");
+  
+
   return 0;
-}
-
-void joueur1() {
-  char nom1[20];
-  puts("Entrez votre nom joueur 1: ");
-  scanf("%s", nom1);
-}
-
-void joueur2() {
-  char nom2[20];
-  puts("Entrez votre nom joueur 2: ");
-  scanf("%s", nom2);
 }
