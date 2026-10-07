@@ -78,9 +78,23 @@ int plateau(int mat[TAILLE][TAILLE]) {
 
     for (int colonne = 0; colonne < TAILLE; colonne++) {
 
-      mat[ligne][colonne] = 0;
+      // 2 premières lignes : noirs (2), 2 dernières : blancs (1), sinon vide (0)
+      if (ligne < 2) {
+        mat[ligne][colonne] = 2;
+      } else if (ligne >= TAILLE - 2) {
+        mat[ligne][colonne] = 1;
+      } else {
+        mat[ligne][colonne] = 0;
+      }
 
-      printf("%d  ", mat[ligne][colonne]);
+      // affiche N pour noir & B pour blanc, 0 pour vide
+      if (mat[ligne][colonne] == 2) {
+        printf("N  ");
+      } else if (mat[ligne][colonne] == 1) {
+        printf("B  ");
+      } else {
+        printf("0  ");
+      }
 
     }
 
@@ -112,8 +126,9 @@ int plateau(int mat[TAILLE][TAILLE]) {
 
 void deuxJoueurs() {
   char nom1[20], nom2[20];
-  puts("Entrez votre nom joueur 1");
+  puts("\nEntrez votre nom joueur 1");
   scanf("%s", nom1);
-  puts("Entrez votre nom joueur 2");
+  puts("\nEntrez votre nom joueur 2");
   scanf("%s", nom2);
+  printf("\n");
 }
