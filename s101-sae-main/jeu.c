@@ -14,7 +14,8 @@
 
 void deuxJoueurs();
 void afficherRegles();
-int plateau(int mat[TAILLE][TAILLE]);
+void initialiserPlateau(int mat[TAILLE][TAILLE]);
+void afficherPlateau(int mat[TAILLE][TAILLE]);
 
 int main() {
   // afficheSep est déclarée dans lib/exemple.h et définie dans lib/exemple.c
@@ -34,7 +35,14 @@ int main() {
     default:
       printf("Vous jouez contre l'ordinateur \n");
   }
-  plateau(mat);
+  initialiserPlateau(mat);
+
+  // on place des pions à la main pour vérifier l'affichage
+  mat[4][3] = 1;   // pion blanc en D4
+  mat[3][5] = 2;   // pion noir en F5
+  mat[1][0] = 0;   // case A7 vidée
+
+  afficherPlateau(mat);
   afficheSep();
 
   return 0;
@@ -50,9 +58,28 @@ void afficherRegles() {
       "jamais\n");
 }
 
-int plateau(int mat[TAILLE][TAILLE]) {
+// remet le plateau dans son état initial
+void initialiserPlateau(int mat[TAILLE][TAILLE]) {
 
+  for (int ligne = 0; ligne < TAILLE; ligne++) {
 
+    for (int colonne = 0; colonne < TAILLE; colonne++) {
+
+      // 2 premières lignes : noirs (2), 2 dernières : blancs (1), sinon vide (0)
+      if (ligne < 2) {
+        mat[ligne][colonne] = 2;
+      } else if (ligne >= TAILLE - 2) {
+        mat[ligne][colonne] = 1;
+      } else {
+        mat[ligne][colonne] = 0;
+      }
+
+    }
+  }
+}
+
+// affiche le plateau tel qu'il est, sans le modifier
+void afficherPlateau(int mat[TAILLE][TAILLE]) {
 
   // pour afficher les index des cases en lettre EN HAUT
   char Colonnelettre = 'A';
@@ -77,15 +104,6 @@ int plateau(int mat[TAILLE][TAILLE]) {
     printf("%d    ", Ligne);
 
     for (int colonne = 0; colonne < TAILLE; colonne++) {
-
-      // 2 premières lignes : noirs (2), 2 dernières : blancs (1), sinon vide (0)
-      if (ligne < 2) {
-        mat[ligne][colonne] = 2;
-      } else if (ligne >= TAILLE - 2) {
-        mat[ligne][colonne] = 1;
-      } else {
-        mat[ligne][colonne] = 0;
-      }
 
       // affiche N pour noir & B pour blanc, 0 pour vide
       if (mat[ligne][colonne] == 2) {
@@ -118,9 +136,6 @@ int plateau(int mat[TAILLE][TAILLE]) {
   }
 
   printf("\n");
-
-
-  return 0;
 }
 
 
