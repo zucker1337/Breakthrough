@@ -12,10 +12,11 @@
 // taille variable du tableau
 #define TAILLE 8
 
-void deuxJoueurs();
+void deuxJoueurs(char joueur[2][30]);
 void afficherRegles();
 void initialiserPlateau(int mat[TAILLE][TAILLE]);
 void afficherPlateau(int mat[TAILLE][TAILLE]);
+void simulerDeplacementPion(int mat[TAILLE][TAILLE]);
 
 int main() {
   // afficheSep est déclarée dans lib/exemple.h et définie dans lib/exemple.c
@@ -23,31 +24,60 @@ int main() {
 
 
   int choix, mat[TAILLE][TAILLE];
+  // noms des joueurs, créés ici pour que main puisse s'en servir
+  char joueur[2][30] = {"Joueur 1", "Ordinateur"};
+  int tour = 0;
+
   puts("Choisir un mode: 1. Pour 2 joueurs, 2. Contre l'ordinateur. ");
   scanf("%d", &choix);
   afficherRegles();
-  
+
   switch (choix) {
     case 1:
-      deuxJoueurs();
+      deuxJoueurs(joueur);
       break;
 
     default:
       printf("Vous jouez contre l'ordinateur \n");
   }
   initialiserPlateau(mat);
-
-  // on place des pions à la main pour vérifier l'affichage
-  mat[4][3] = 1;   // pion blanc en D4
-  mat[3][5] = 2;   // pion noir en F5
-  mat[1][0] = 0;   // case A7 vidée
-
   afficherPlateau(mat);
+
+  // tour du joueur 1
+  printf("\nC'est à %s de jouer \n", joueur[tour]);
+  simulerDeplacementPion(mat);
+  afficherPlateau(mat);
+
+  // on passe au joueur 2 (sans suite pour l'instant)
+  tour = 1 - tour;
+  printf("\nC'est à %s de jouer \n", joueur[tour]);
+
   afficheSep();
 
   return 0;
 }
 
+
+void simulerDeplacementPion(int mat[TAILLE][TAILLE]){
+
+  //le coup va etre joué pour le joueur 1 puis cela indiquera que c'est au joueur 2 de jouer
+  // on déplace un pion à la main pour vérifier l'affichage
+
+  int jouer = 1;
+  int a;
+  printf("taper 1 pour jouer le coup: ");
+  scanf("%d", &a);
+
+  if(a == jouer){
+
+    mat[6][3] = 0;   // le pion blanc quitte D2
+    mat[5][3] = 1;   // et arrive en D3
+
+    printf("joueur 1 a fini son coup\n");
+  }
+
+
+}
 void afficherRegles() {
   printf(
       "A son tour, un joueur déplace un de ses pions d'une case vers l'avant : "
@@ -139,13 +169,9 @@ void afficherPlateau(int mat[TAILLE][TAILLE]) {
 }
 
 
-void deuxJoueurs() {
-  char joueur[2][30];
-  int tour = 0;
+void deuxJoueurs(char joueur[2][30]) {
   for (int i = 0; i < 2; i++) {
     printf("Nom du Joueur %d: \n ", i + 1);
     scanf("%29s", joueur[i]);
   }
-  printf("C'est à %s de jouer \n", joueur[tour]);
-  tour = 1 - tour;
 }
