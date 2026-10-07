@@ -125,10 +125,12 @@ int plateau(int mat[TAILLE][TAILLE]) {
 
 
 void deuxJoueurs() {
-  char nom1[20], nom2[20];
-  puts("\nEntrez votre nom joueur 1");
-  scanf("%s", nom1);
-  puts("\nEntrez votre nom joueur 2");
-  scanf("%s", nom2);
-  printf("\n");
+  char joueur[2][30];
+  int tour = 0;
+  for (int i = 0; i < 2; i++) {
+    printf("Nom du Joueur %d: \n ", i + 1);
+    scanf("%29s", joueur[i]);
+  }
+  printf("C'est à %s de jouer \n", joueur[tour]);
+  tour = 1 - tour;
 }
