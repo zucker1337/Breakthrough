@@ -52,18 +52,44 @@ Exemple d'affichage :
 
 Joueur Blanc, votre coup (ex : B2 B3) 
 
-**Adversaire automatique** (stratégie prévue, pas encore réalisée) : à son
-tour, l'ordinateur parcourt tous ses coups valides (avec `estCoupValide`) et
-choisit selon l'ordre de priorité suivant :
+**Adversaire automatique** (stratégie prévue, pas encore réalisée)
 
-1. un coup gagnant : un pion qui atteint la dernière rangée adverse ;
-2. une prise : un coup en diagonale qui mange un pion adverse ;
-3. un coup sûr : une avance sur une case où le pion ne peut pas être mangé au
-   tour suivant (aucun pion adverse en diagonale devant la case d'arrivée) ;
-4. sinon, un coup valide tiré au hasard.
+En mode « contre l'ordinateur », l'humain joue les Blancs (joueur 1, il
+commence) et l'ordinateur joue les Noirs (joueur 2, il avance vers la ligne
+`TAILLE - 1`, soit `direction = +1`).
 
-Si plusieurs coups ont la même priorité, l'un d'eux est tiré au hasard, pour
-que les parties ne soient pas toujours identiques.
+*Étape 1 : lister tous les coups valides.* L'ordinateur parcourt toutes les
+cases du plateau. Pour chaque case `(lig, col)` qui contient un de ses pions,
+il essaie les 3 cases d'arrivée possibles : `(lig + 1, col - 1)`,
+`(lig + 1, col)` et `(lig + 1, col + 1)`. Il ne garde que celles acceptées
+par `estCoupValide`. Il y a au plus 16 pions × 3 = 48 coups, on les range
+dans des tableaux de taille `2 * TAILLE * 3`.
+
+*Étape 2 : donner une priorité à chaque coup* (1 = meilleur). Un coup reçoit
+la première priorité de la liste dont il remplit la condition :
+
+| Priorité | Type de coup | Condition précise (Noirs, case d'arrivée `(la, ca)`) |
+| --- | --- | --- |
+| 1 | Coup gagnant | `la == TAILLE - 1` : le pion atteint la dernière rangée |
+| 2 | Prise défensive | la case d'arrivée contient un pion blanc situé en ligne `1` : ce pion blanc gagnerait au tour suivant, il faut le manger |
+| 3 | Prise sûre | coup en diagonale sur un pion blanc **et** case d'arrivée non menacée |
+| 4 | Avance sûre | case d'arrivée vide **et** non menacée |
+| 5 | Prise risquée | coup en diagonale sur un pion blanc, mais case d'arrivée menacée |
+| 6 | Autre coup | tout autre coup valide (avance sur une case menacée) |
+
+Une case `(la, ca)` est **menacée** si un pion blanc se trouve en
+`(la + 1, ca - 1)` ou en `(la + 1, ca + 1)` (en vérifiant avec
+`estDansPlateau`) : au tour suivant, ce pion blanc pourrait avancer en
+diagonale sur la case et manger le pion noir.
+
+*Étape 3 : choisir le coup.* L'ordinateur garde uniquement les coups qui ont
+la meilleure priorité (la plus petite valeur) et en tire un au hasard avec
+`rand() % nombreDeCoups`. `srand(time(NULL))` est appelé une seule fois au
+début de `main`, pour que les parties ne soient pas toujours identiques.
+
+L'ordinateur n'est jamais appelé sans coup possible : si un joueur ne peut
+plus jouer, `gagnant` le détecte (avec `peutJouer`) et la partie s'arrête
+avant.
 
 **Fonctionnalités valorisées** : [à compléter au fil du projet -- ex : taille
 de plateau paramétrable, historique des coups, scores sur plusieurs parties].
@@ -128,8 +154,9 @@ déclaré dans `main` et passé aux fonctions qui en ont besoin.
 
 ```
 main
+├── void choisirMode()                                 (demande le mode, annonce le joueur dont c'est le tour)
+│   └── void deuxJoueurs(char joueur[2][30])           (mode 1 : demande le nom des 2 joueurs)
 ├── void afficherRegles()                              (affiche les règles du jeu)
-├── void deuxJoueurs(char joueur[2][30])               (mode 1 : demande le nom des 2 joueurs)
 ├── void initialiserPlateau(char mat[TAILLE][TAILLE])  (remet le plateau dans son état initial)
 ├── void afficherPlateau(char mat[TAILLE][TAILLE])     (affiche le plateau avec les lettres de colonnes
 │                                                       et les numéros de lignes, sans le modifier)
@@ -142,7 +169,7 @@ main
 ```
 main
 ├── void afficherRegles()
-├── int choisirMode()                                  (1 = 2 joueurs, 2 = contre l'ordinateur)
+├── void choisirMode()                                  (renvoie 1 = 2 joueurs, 2 = contre l'ordinateur)
 ├── int jouerPartie(int mode)                          (renvoie le numéro du gagnant)
 │   ├── void initialiserPlateau(char plateau[TAILLE][TAILLE])
 │   ├── void afficherPlateau(char plateau[TAILLE][TAILLE])
@@ -155,7 +182,12 @@ main
 │   │       └── int direction(int joueur)              (-1 pour les Blancs, +1 pour les Noirs)
 │   ├── void choisirCoupOrdinateur(char plateau[TAILLE][TAILLE], int joueur,
 │   │                              int *ligDep, int *colDep, int *ligArr, int *colArr)
-│   │   └── bool estCoupValide(...)
+│   │   ├── bool estCoupValide(...)
+│   │   ├── int prioriteCoup(char plateau[TAILLE][TAILLE], int joueur,
+│   │   │                    int ligDep, int colDep, int ligArr, int colArr)
+│   │   │                                              (1 à 6, voir stratégie de l'adversaire)
+│   │   └── bool estMenacee(char plateau[TAILLE][TAILLE], int joueur, int lig, int col)
+│   │       └── bool estDansPlateau(int lig, int col)
 │   ├── void jouerCoup(char plateau[TAILLE][TAILLE],
 │   │                  int ligDep, int colDep, int ligArr, int colArr)
 │   ├── int gagnant(char plateau[TAILLE][TAILLE], int joueurSuivant)   (0 si la partie continue)
