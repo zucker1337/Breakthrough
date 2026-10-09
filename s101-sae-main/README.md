@@ -118,7 +118,7 @@ main
 ```
 main
 ├── void afficherRegles()
-├── int choisirMode()                                  (1 = 2 joueurs, 2 = contre l'ordinateur)
+├── void choisirMode()                                  (1 = 2 joueurs, 2 = contre l'ordinateur)
 ├── int jouerPartie(int mode)                          (renvoie le numéro du gagnant)
 │   ├── void initialiserPlateau(int plateau[TAILLE][TAILLE])
 │   ├── void afficherPlateau(int plateau[TAILLE][TAILLE])
