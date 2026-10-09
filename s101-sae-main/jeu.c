@@ -12,17 +12,21 @@
 #define TAILLE 8
 
 void deuxJoueurs(char joueur[2][30]);
-void choisirMode();
 void afficherRegles();
-void initialiserPlateau(int mat[TAILLE][TAILLE]);
-void afficherPlateau(int mat[TAILLE][TAILLE]);
-void simulerDeplacementPion(int mat[TAILLE][TAILLE]);
+void initialiserPlateau(char mat[TAILLE][TAILLE]);
+void afficherPlateau(char mat[TAILLE][TAILLE]);
+void simulerDeplacementPion(char mat[TAILLE][TAILLE]);
+
+void choisirMode();
+
+bool estDansPlateau(int lig, int col);
 
 int main() {
   // afficheSep est déclarée dans lib/exemple.h et définie dans lib/exemple.c
   afficheSep();
 
-  int mat[TAILLE][TAILLE];
+  char mat[TAILLE][TAILLE];
+
   choisirMode();
   afficherRegles();
 
@@ -37,7 +41,7 @@ int main() {
   return 0;
 }
 
-void simulerDeplacementPion(int mat[TAILLE][TAILLE]) {
+void simulerDeplacementPion(char mat[TAILLE][TAILLE]) {
   // le coup va etre joué pour le joueur 1 puis cela indiquera que c'est au
   // joueur 2 de jouer
   //  on déplace un pion à la main pour vérifier l'affichage
@@ -65,7 +69,7 @@ void afficherRegles() {
 }
 
 // remet le plateau dans son état initial
-void initialiserPlateau(int mat[TAILLE][TAILLE]) {
+void initialiserPlateau(char mat[TAILLE][TAILLE]) {
   for (int ligne = 0; ligne < TAILLE; ligne++) {
     for (int colonne = 0; colonne < TAILLE; colonne++) {
       // 2 premières lignes : noirs (2), 2 dernières : blancs (1), sinon vide
@@ -82,7 +86,7 @@ void initialiserPlateau(int mat[TAILLE][TAILLE]) {
 }
 
 // affiche le plateau tel qu'il est, sans le modifier
-void afficherPlateau(int mat[TAILLE][TAILLE]) {
+void afficherPlateau(char mat[TAILLE][TAILLE]) {
   // pour afficher les index des cases en lettre EN HAUT
   char Colonnelettre = 'A';
 
@@ -137,6 +141,14 @@ void deuxJoueurs(char joueur[2][30]) {
     printf("Nom du Joueur %d: \n ", i + 1);
     scanf("%29s", joueur[i]);
   }
+}
+
+bool estDansPlateau(int lig, int col) {
+  if (lig >= 0 && lig < TAILLE && col >= 0 && col < TAILLE) {
+    return true;
+  }
+
+  return false;
 }
 
 void choisirMode() {

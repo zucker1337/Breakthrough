@@ -84,8 +84,32 @@ gcc -std=c23 -Wall -Werror jeu.c lib/*.c -o jeu -lm
 
 ### Représentation du plateau
 
-Le plateau est un tableau 2D d'entiers `int mat[TAILLE][TAILLE]`, déclaré
-dans `main` et passé aux fonctions qui en ont besoin.
+Le plateau est un tableau 2D carré de `char` : `char mat[TAILLE][TAILLE]`,
+déclaré dans `main` et passé aux fonctions qui en ont besoin.
+
+**Pourquoi ce choix de structure de données ?**
+
+- **Un tableau à 2 dimensions** : le plateau est une grille, une case est
+  repérée par une ligne et une colonne. Avec `mat[ligne][colonne]` on accède
+  directement à n'importe quelle case, sans calcul d'indice. Les déplacements
+  s'écrivent simplement : avancer = changer de ligne, diagonale = changer de
+  ligne et de colonne (`colonne - 1` ou `colonne + 1`).
+- **Un tableau carré (`TAILLE × TAILLE`)** : le plateau de Breakthrough a
+  autant de lignes que de colonnes (8 × 8). Une seule constante `TAILLE`
+  suffit donc pour les deux dimensions et pour toutes les boucles de
+  parcours.
+- **Le type `char` plutôt que `int`** : une case ne peut contenir que
+  **3 valeurs** (`0`, `1` ou `2`). Un `int` occupe 4 octets alors qu'un
+  `char` n'en occupe qu'1 et suffit largement (il va de -128 à 127). Le
+  plateau 8 × 8 tient donc en **64 octets au lieu de 256**, soit 4 fois moins
+  de mémoire, sans rien perdre.
+- **On stocke des petits nombres (`0`, `1`, `2`) dans le `char`, pas des
+  lettres (`'B'`, `'N'`)** : ainsi la valeur d'une case est directement le
+  numéro du joueur qui l'occupe, ce qui simplifie les tests (`mat[l][c] ==
+  joueur`). La conversion en lettres `B`/`N` n'est faite qu'à l'affichage,
+  dans `afficherPlateau`.
+
+**Conventions** :
 
 - Taille : `#define TAILLE 8` en haut de `jeu.c`, seul endroit à modifier
   pour changer la taille du plateau (26 au maximum, à cause des lettres de
@@ -106,10 +130,10 @@ dans `main` et passé aux fonctions qui en ont besoin.
 main
 ├── void afficherRegles()                              (affiche les règles du jeu)
 ├── void deuxJoueurs(char joueur[2][30])               (mode 1 : demande le nom des 2 joueurs)
-├── void initialiserPlateau(int mat[TAILLE][TAILLE])   (remet le plateau dans son état initial)
-├── void afficherPlateau(int mat[TAILLE][TAILLE])      (affiche le plateau avec les lettres de colonnes
+├── void initialiserPlateau(char mat[TAILLE][TAILLE])  (remet le plateau dans son état initial)
+├── void afficherPlateau(char mat[TAILLE][TAILLE])     (affiche le plateau avec les lettres de colonnes
 │                                                       et les numéros de lignes, sans le modifier)
-└── void simulerDeplacementPion(int mat[TAILLE][TAILLE])
+└── void simulerDeplacementPion(char mat[TAILLE][TAILLE])
                                                        (simule un coup du joueur 1 : pion blanc D2 -> D3)
 ```
 
@@ -118,26 +142,26 @@ main
 ```
 main
 ├── void afficherRegles()
-├── void choisirMode()                                  (1 = 2 joueurs, 2 = contre l'ordinateur)
+├── int choisirMode()                                  (1 = 2 joueurs, 2 = contre l'ordinateur)
 ├── int jouerPartie(int mode)                          (renvoie le numéro du gagnant)
-│   ├── void initialiserPlateau(int plateau[TAILLE][TAILLE])
-│   ├── void afficherPlateau(int plateau[TAILLE][TAILLE])
-│   ├── void saisirCoup(int plateau[TAILLE][TAILLE], int joueur,
+│   ├── void initialiserPlateau(char plateau[TAILLE][TAILLE])
+│   ├── void afficherPlateau(char plateau[TAILLE][TAILLE])
+│   ├── void saisirCoup(char plateau[TAILLE][TAILLE], int joueur,
 │   │                   int *ligDep, int *colDep, int *ligArr, int *colArr)
 │   │   ├── bool lireCase(int *lig, int *col)          (scanf d'une case type "B2", conversion lettre/chiffre)
-│   │   └── bool estCoupValide(int plateau[TAILLE][TAILLE], int joueur,
+│   │   └── bool estCoupValide(char plateau[TAILLE][TAILLE], int joueur,
 │   │                          int ligDep, int colDep, int ligArr, int colArr)
 │   │       ├── bool estDansPlateau(int lig, int col)
 │   │       └── int direction(int joueur)              (-1 pour les Blancs, +1 pour les Noirs)
-│   ├── void choisirCoupOrdinateur(int plateau[TAILLE][TAILLE], int joueur,
+│   ├── void choisirCoupOrdinateur(char plateau[TAILLE][TAILLE], int joueur,
 │   │                              int *ligDep, int *colDep, int *ligArr, int *colArr)
 │   │   └── bool estCoupValide(...)
-│   ├── void jouerCoup(int plateau[TAILLE][TAILLE],
+│   ├── void jouerCoup(char plateau[TAILLE][TAILLE],
 │   │                  int ligDep, int colDep, int ligArr, int colArr)
-│   ├── int gagnant(int plateau[TAILLE][TAILLE], int joueurSuivant)   (0 si la partie continue)
-│   │   ├── bool aAtteintDerniereRangee(int plateau[TAILLE][TAILLE], int joueur)
-│   │   ├── int compterPions(int plateau[TAILLE][TAILLE], int joueur)
-│   │   └── bool peutJouer(int plateau[TAILLE][TAILLE], int joueur)
+│   ├── int gagnant(char plateau[TAILLE][TAILLE], int joueurSuivant)   (0 si la partie continue)
+│   │   ├── bool aAtteintDerniereRangee(char plateau[TAILLE][TAILLE], int joueur)
+│   │   ├── int compterPions(char plateau[TAILLE][TAILLE], int joueur)
+│   │   └── bool peutJouer(char plateau[TAILLE][TAILLE], int joueur)
 │   │       └── bool estCoupValide(...)
 │   └── int adversaire(int joueur)
 ├── void afficherGagnant(int joueur)
