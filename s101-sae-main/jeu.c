@@ -24,7 +24,7 @@ int main() {
 
 
   int choix, mat[TAILLE][TAILLE];
-  // noms des joueurs, créés ici pour que main puisse s'en servir
+
   char joueur[2][30] = {"Joueur 1", "Ordinateur"};
   int tour = 0;
 
@@ -48,7 +48,7 @@ int main() {
   simulerDeplacementPion(mat);
   afficherPlateau(mat);
 
-  // on passe au joueur 2 (sans suite pour l'instant)
+  // on passe au joueur 2 ( pas de suite pour le moment : todo)
   tour = 1 - tour;
   printf("\nC'est à %s de jouer \n", joueur[tour]);
 
