@@ -12,7 +12,7 @@ réalisé à plusieurs cite tous ses auteurs : `(@prénom1, @prénom2)`.
 
 - Fonction `estDansPlateau` : vérifie qu'une case (ligne, colonne) est dans le plateau, prévue pour la validation des coups mais pas encore utilisée (@Mohammad)
 
-- Procédure `choisirMode`: permet de sélectionner le mode de jeu (1 = entre 2 joueurs, 2 =  entre un joueur et un ordinateur) (@Solomon)
+- Procédure `choisirMode` : demande le mode de jeu (1 = deux joueurs, 2 = contre l'ordinateur) ; le choix du mode n'est plus écrit directement dans `main`, conformément au schéma de décomposition (@Solomon)
 
 ### Modifié
 
@@ -20,10 +20,13 @@ réalisé à plusieurs cite tous ses auteurs : `(@prénom1, @prénom2)`.
 
 - Justification du choix de structure de données (tableau 2D, carré, de `char`) ajoutée dans le `README.md` (@Mohammad)
 
-- La selection du mode de jeu (1 = joueur , 2 = ordinateur) à été directement mit dans un void comme prévu (par rapport à notre schéma de decomposition) au lieu d'etre écrit dans notre main
+- Les noms des joueurs et l'annonce du tour sont déplacés de `main` vers `choisirMode` (@Solomon)
+
+- Schéma de décomposition mis à jour dans le `README.md` : `choisirMode` appelle `deuxJoueurs`, et `choisirMode` renverra le mode choisi dans la version finale (@Mohammad)
 
 ### Corrigé
 
+- Retour sur le rendu de la semaine 2 : stratégie de l'adversaire automatique précisée dans le `README.md` (camp joué par l'ordinateur, liste des coups possibles, 6 niveaux de priorité, définition d'une case menacée, tirage au hasard en cas d'égalité) (@Mohammad)
 
 
 ## Semaine 2 -- 07/10/26
@@ -35,7 +38,6 @@ réalisé à plusieurs cite tous ses auteurs : `(@prénom1, @prénom2)`.
 - Affichage du nom du joueur dont c'est le tour (C'est à … de jouer) (@Solomon)
 
 - Fonction `simulerDeplacementPion` : simule un coup du joueur 1 puis réaffiche le plateau mis à jour puis annonce le tour du joueur 2 (@Mohammad)
-
 
 ### Modifié
 
