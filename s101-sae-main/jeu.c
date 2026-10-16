@@ -11,23 +11,34 @@
 // taille variable du tableau
 #define TAILLE 8
 
-void deuxJoueurs(char joueur[2][30]);
+//regroupe le nom et pion dans une seule unité
+struct Joueur {
+  char nom[30];
+  char pion;
+};
+
+void deuxJoueurs(struct Joueur joueurs[2]);
 void afficherRegles();
 void initialiserPlateau(char mat[TAILLE][TAILLE]);
 void afficherPlateau(char mat[TAILLE][TAILLE]);
 void simulerDeplacementPion(char mat[TAILLE][TAILLE]);
 
-void choisirMode();
+void choisirMode(struct Joueur joueurs[2]);
 
 bool estDansPlateau(int lig, int col);
 
 int main() {
   // afficheSep est déclarée dans lib/exemple.h et définie dans lib/exemple.c
   afficheSep();
+  struct Joueur joueurs = {
+  {"Joueur 1", 'B'}, 
+  {"Joueur 2", 'N'}
 
+  };
+  
   char mat[TAILLE][TAILLE];
 
-  choisirMode();
+  choisirMode(joueurs);
   afficherRegles();
 
   initialiserPlateau(mat);
@@ -136,10 +147,10 @@ void afficherPlateau(char mat[TAILLE][TAILLE]) {
   printf("\n");
 }
 
-void deuxJoueurs(char joueur[2][30]) {
+void deuxJoueurs(struct Joueur joueurs [2]) {
   for (int i = 0; i < 2; i++) {
     printf("Nom du Joueur %d: \n ", i + 1);
-    scanf("%29s", joueur[i]);
+    scanf("%29s", joueurs[i].nom);
   }
 }
 
@@ -151,24 +162,23 @@ bool estDansPlateau(int lig, int col) {
   return false;
 }
 
-void choisirMode() {
+void choisirMode(struct Joueur joueurs [2]) {
   int choix;
-  char joueur[2][30] = {"Joueur 1", "Ordinateur"};
   int tour = 0;
   puts("Choisir un mode: 1. Pour 2 joueurs, 2. Contre l'ordinateur. ");
   scanf("%d", &choix);
   switch (choix) {
     case 1:
-      deuxJoueurs(joueur);
+      deuxJoueurs(joueurs);
       break;
 
     default:
       printf("Vous jouez contre l'ordinateur \n");
       break;
   }
-  printf("\nC'est à %s de jouer \n", joueur[tour]);
+  printf("\nC'est à %s de jouer \n", joueurs[tour].nom);
 
   // on passe au joueur 2 (sans suite pour l'instant)
   tour = 1 - tour;
-  printf("\nC'est à %s de jouer \n", joueur[tour]);
+  printf("\nC'est à %s de jouer \n", joueurs[tour].nom);
 }
