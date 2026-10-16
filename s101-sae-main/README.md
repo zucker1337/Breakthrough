@@ -50,7 +50,7 @@ Exemple d'affichage :
 
          A  B  C  D  E  F  G  H
 
-Joueur Blanc, votre coup (ex : B2 B3) 
+Mohammad, votre coup (ex : B2 B3) : 
 
 **Adversaire automatique** (stratégie prévue, pas encore réalisée)
 
@@ -91,8 +91,10 @@ L'ordinateur n'est jamais appelé sans coup possible : si un joueur ne peut
 plus jouer, `gagnant` le détecte (avec `peutJouer`) et la partie s'arrête
 avant.
 
-**Fonctionnalités valorisées** : [à compléter au fil du projet -- ex : taille
-de plateau paramétrable, historique des coups, scores sur plusieurs parties].
+**Fonctionnalités valorisées** : la taille du plateau est paramétrable par la
+seule constante `TAILLE`, de 4 à 26, sans aucune autre modification du code.
+Sont prévus pour la suite l'adversaire automatique à six niveaux de priorité
+décrit ci-dessus et un historique des coups de la partie.
 
 ## Compilation et exécution
 
@@ -110,8 +112,8 @@ gcc -std=c23 -Wall -Werror jeu.c lib/*.c -o jeu -lm
 
 ### Représentation du plateau
 
-Le plateau est un tableau 2D carré de `char` : `char mat[TAILLE][TAILLE]`,
-déclaré dans `main` et passé aux fonctions qui en ont besoin.
+Le plateau est un tableau 2D carré de `char` : `char plateau[TAILLE][TAILLE]`,
+rangé dans la structure `Partie` et transmis aux fonctions avec elle.
 
 **Pourquoi ce choix de structure de données ?**
 
@@ -140,74 +142,147 @@ déclaré dans `main` et passé aux fonctions qui en ont besoin.
 - Taille : `#define TAILLE 8` en haut de `jeu.c`, seul endroit à modifier
   pour changer la taille du plateau (26 au maximum, à cause des lettres de
   colonnes A à Z).
-- Contenu d'une case : `0` = case vide, `1` = pion blanc, `2` = pion noir.
-  La valeur d'une case est donc aussi le numéro du joueur qui l'occupe.
+- Contenu d'une case : `CASE_VIDE` (0), `PION_BLANC` (1) ou `PION_NOIR` (2),
+  les trois noms de l'énumération `Contenu`. La valeur d'une case est donc
+  aussi le numéro du joueur qui l'occupe.
 - Ligne `0` du tableau = rangée 8 affichée en haut, ligne `TAILLE - 1` =
   rangée 1 affichée en bas. Colonne `0` = colonne A.
 - État initial : les Noirs occupent les lignes `0` et `1`, les Blancs les
   lignes `TAILLE - 2` et `TAILLE - 1`, le reste est vide. Les Blancs
   (joueur 1) avancent vers la ligne 0, les Noirs (joueur 2) vers la ligne
   `TAILLE - 1`.
-- Affichage : `1` est affiché `B`, `2` est affiché `N`, une case vide `0`.
+- Affichage : `PION_BLANC` est affiché `B`, `PION_NOIR` est affiché `N`,
+  une case vide `0`.
 
-### Fonctions réalisées (semaine 2)
+### Les informations du jeu
+
+Les informations qui vont ensemble sont regroupées dans des structures, pour
+que le programme manipule chacune comme une seule unité. Les fonctions
+s'échangent ces unités plutôt qu'une longue liste de paramètres : par exemple
+`afficherPlateau` reçoit la partie, et non le plateau et le reste séparément.
+
+```c
+typedef enum { CASE_VIDE, PION_BLANC, PION_NOIR } Contenu;
+
+typedef struct {
+  int ligne;
+  int colonne;
+} Case;
+
+typedef struct {
+  Case depart;
+  Case arrivee;
+} Coup;
+
+typedef struct {
+  char nom[TAILLE_NOM];
+  Contenu pion;
+} Joueur;
+
+typedef struct {
+  char plateau[TAILLE][TAILLE];
+  Joueur joueur[NB_JOUEURS];
+  int tour;
+  int nbCoups;
+} Partie;
+```
+
+| Structure | Ce qu'elle regroupe |
+| --- | --- |
+| `Case` | une case du plateau : sa ligne et sa colonne |
+| `Coup` | un coup : la case de départ et la case visée |
+| `Joueur` | un joueur : son nom et son pion |
+| `Partie` | le plateau, les deux joueurs, le joueur dont c'est le tour et le nombre de coups joués |
+
+Le contenu d'une case et la raison du refus d'un coup sont nommés par deux
+énumérations, `Contenu` et `Verdict`, au lieu d'être écrits en chiffres dans
+le code.
+
+### Fonctions réalisées (semaine 3)
 
 ```
 main
-├── void choisirMode()                                 (demande le mode, annonce le joueur dont c'est le tour)
-│   └── void deuxJoueurs(char joueur[2][30])           (mode 1 : demande le nom des 2 joueurs)
 ├── void afficherRegles()                              (affiche les règles du jeu)
-├── void initialiserPlateau(char mat[TAILLE][TAILLE])  (remet le plateau dans son état initial)
-├── void afficherPlateau(char mat[TAILLE][TAILLE])     (affiche le plateau avec les lettres de colonnes
-│                                                       et les numéros de lignes, sans le modifier)
-└── void simulerDeplacementPion(char mat[TAILLE][TAILLE])
-                                                       (simule un coup du joueur 1 : pion blanc D2 -> D3)
+├── int choisirMode()                                  (demande le mode et le renvoie :
+│                                                       1 = deux joueurs, 2 = contre l'ordinateur)
+├── void initialiserPartie(Partie *ptrPartie, int mode)
+│   │                                                  (place les pions, remplit les 2 joueurs,
+│   │                                                   remet le tour et le compteur à zéro)
+│   └── void deuxJoueurs(Joueur joueur[NB_JOUEURS])    (mode 1 : demande le prénom des 2 joueurs)
+└── void jouerPartie(Partie *ptrPartie)                (fait alterner les joueurs jusqu'au blocage)
+    ├── void afficherPlateau(const Partie *ptrPartie)  (affiche le plateau avec les lettres de colonnes
+    │                                                   et les numéros de lignes, sans le modifier)
+    ├── bool peutJouer(const Partie *ptrPartie)        (reste-t-il un coup jouable au joueur du tour ?)
+    │   └── Verdict verifierCoup(...)
+    ├── void annoncerTour(const Partie *ptrPartie)     (annonce le joueur dont c'est le tour)
+    ├── bool saisirCoup(const Partie *ptrPartie, Coup *ptrCoup)
+    │   │                                              (redemande un coup tant qu'il est refusé)
+    │   ├── int lireCase(Case *ptrCase)                (lit une case tapée comme B2)
+    │   │   └── void viderLigne()                      (jette la fin d'une saisie illisible)
+    │   ├── Verdict verifierCoup(const Partie *ptrPartie, Coup coup)
+    │   │   ├── bool estDansPlateau(int lig, int col)
+    │   │   └── int direction(Contenu pion)            (-1 pour les Blancs, +1 pour les Noirs)
+    │   └── void afficherRefus(Verdict verdict)        (explique pourquoi le coup est refusé)
+    ├── void jouerCoup(Partie *ptrPartie, Coup coup)   (place le coup et compte un coup de plus)
+    └── void changerJoueur(Partie *ptrPartie)          (passe la main à l'autre joueur)
 ```
+
+Toutes ces fonctions reçoivent la partie entière : les prénoms, le plateau, le
+tour et le nombre de coups restent disponibles du début à la fin. Celles qui ne
+modifient rien reçoivent un `const Partie *`.
+
+La détection du gagnant et l'adversaire automatique ne sont pas encore écrits :
+la partie s'arrête pour l'instant quand le joueur dont c'est le tour n'a plus
+aucun coup jouable.
 
 ### Décomposition prévue (fin de projet)
 
 ```
 main
 ├── void afficherRegles()
-├── void choisirMode()                                  (renvoie 1 = 2 joueurs, 2 = contre l'ordinateur)
-├── int jouerPartie(int mode)                          (renvoie le numéro du gagnant)
-│   ├── void initialiserPlateau(char plateau[TAILLE][TAILLE])
-│   ├── void afficherPlateau(char plateau[TAILLE][TAILLE])
-│   ├── void saisirCoup(char plateau[TAILLE][TAILLE], int joueur,
-│   │                   int *ligDep, int *colDep, int *ligArr, int *colArr)
-│   │   ├── bool lireCase(int *lig, int *col)          (scanf d'une case type "B2", conversion lettre/chiffre)
-│   │   └── bool estCoupValide(char plateau[TAILLE][TAILLE], int joueur,
-│   │                          int ligDep, int colDep, int ligArr, int colArr)
-│   │       ├── bool estDansPlateau(int lig, int col)
-│   │       └── int direction(int joueur)              (-1 pour les Blancs, +1 pour les Noirs)
-│   ├── void choisirCoupOrdinateur(char plateau[TAILLE][TAILLE], int joueur,
-│   │                              int *ligDep, int *colDep, int *ligArr, int *colArr)
-│   │   ├── bool estCoupValide(...)
-│   │   ├── int prioriteCoup(char plateau[TAILLE][TAILLE], int joueur,
-│   │   │                    int ligDep, int colDep, int ligArr, int colArr)
+├── int choisirMode()                                  (renvoie 1 = 2 joueurs, 2 = contre l'ordinateur)
+├── void initialiserPartie(Partie *ptrPartie, int mode)
+│   └── void deuxJoueurs(Joueur joueur[NB_JOUEURS])    (mode 1 : demande le prénom des 2 joueurs)
+├── int jouerPartie(Partie *ptrPartie)                 (renvoie le numéro du gagnant)
+│   ├── void afficherPlateau(const Partie *ptrPartie)
+│   ├── void annoncerTour(const Partie *ptrPartie)
+│   ├── bool saisirCoup(const Partie *ptrPartie, Coup *ptrCoup)
+│   │   ├── int lireCase(Case *ptrCase)                (scanf d'une case type "B2", conversion lettre/chiffre)
+│   │   │   └── void viderLigne()
+│   │   ├── Verdict verifierCoup(const Partie *ptrPartie, Coup coup)
+│   │   │   ├── bool estDansPlateau(int lig, int col)
+│   │   │   └── int direction(Contenu pion)            (-1 pour les Blancs, +1 pour les Noirs)
+│   │   └── void afficherRefus(Verdict verdict)
+│   ├── Coup choisirCoupOrdinateur(const Partie *ptrPartie)
+│   │   ├── Verdict verifierCoup(...)
+│   │   ├── int prioriteCoup(const Partie *ptrPartie, Coup coup)
 │   │   │                                              (1 à 6, voir stratégie de l'adversaire)
-│   │   └── bool estMenacee(char plateau[TAILLE][TAILLE], int joueur, int lig, int col)
+│   │   └── bool estMenacee(const Partie *ptrPartie, Case caseVisee)
 │   │       └── bool estDansPlateau(int lig, int col)
-│   ├── void jouerCoup(char plateau[TAILLE][TAILLE],
-│   │                  int ligDep, int colDep, int ligArr, int colArr)
-│   ├── int gagnant(char plateau[TAILLE][TAILLE], int joueurSuivant)   (0 si la partie continue)
-│   │   ├── bool aAtteintDerniereRangee(char plateau[TAILLE][TAILLE], int joueur)
-│   │   ├── int compterPions(char plateau[TAILLE][TAILLE], int joueur)
-│   │   └── bool peutJouer(char plateau[TAILLE][TAILLE], int joueur)
-│   │       └── bool estCoupValide(...)
-│   └── int adversaire(int joueur)
-├── void afficherGagnant(int joueur)
+│   ├── void jouerCoup(Partie *ptrPartie, Coup coup)
+│   ├── void changerJoueur(Partie *ptrPartie)
+│   ├── int gagnant(const Partie *ptrPartie)           (0 si la partie continue)
+│   │   ├── bool aAtteintDerniereRangee(const Partie *ptrPartie, Contenu pion)
+│   │   ├── int compterPions(const Partie *ptrPartie, Contenu pion)
+│   │   └── bool peutJouer(const Partie *ptrPartie)
+│   │       └── Verdict verifierCoup(...)
+│   └── int adversaire(int tour)
+├── void afficherGagnant(const Partie *ptrPartie)
 └── bool demanderRejouer()
 ```
 
 ## Organisation du projet
 
-[À compléter quand le code sera réparti en modules dans `lib/`.]
+Tout le jeu tient pour l'instant dans `jeu.c`. Les fonctions seront déplacées
+vers des modules du dossier `lib/` au fur et à mesure qu'elles seront écrites.
 
 | Fichier | Rôle |
 | --- | --- |
-| `jeu.c` | point d'entrée : menu, boucle des parties, rejouer |
-| `lib/...` | [...] |
+| `jeu.c` | point d'entrée : règles, choix du mode, plateau, coups |
+| `lib/exemple.h` | déclaration des fonctions du module d'exemple |
+| `lib/exemple.c` | définition de `afficheSep`, la ligne de séparation |
+| `Doxyfile` | configuration de la documentation Doxygen |
+| `output/` | scénarios de saisie et traces d'exécution |
 
 ## Documentation
 
@@ -220,10 +295,21 @@ doxygen Doxyfile
 
 ## Jeux d'essais
 
-Les traces d'exécution (parties rejouées, résultats des mesures de
-comparaison) se trouvent dans le dossier `output/`.
+Les traces d'exécution se trouvent dans le dossier `output/`. Chaque trace est
+obtenue en lisant les réponses au clavier depuis un fichier de scénario et en
+redirigeant l'affichage du programme vers un fichier :
 
-[À compléter : comment obtenir ces traces.]
+```bash
+./jeu < output/scenario-2joueurs.txt > output/trace-2joueurs.txt
+./jeu < output/scenario-ordinateur.txt > output/trace-ordinateur.txt
+```
+
+| Fichier | Contenu |
+| --- | --- |
+| `scenario-2joueurs.txt` | réponses saisies : mode 2 joueurs, les 2 prénoms, six saisies refusées puis neuf coups valides dont une prise |
+| `trace-2joueurs.txt` | affichage complet du programme pour ce scénario |
+| `scenario-ordinateur.txt` | réponses saisies : mode contre l'ordinateur puis trois coups valides |
+| `trace-ordinateur.txt` | affichage complet du programme pour ce scénario |
 
 ## Journal des changements
 
