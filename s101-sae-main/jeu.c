@@ -1,6 +1,7 @@
 /**
  * @file jeu.c
- * @brief Breakthrough : plateau, saisie des coups et alternance des joueurs.
+ * @brief Breakthrough : plateau, saisie des coups, victoire et parties
+ * enchaînées.
  */
 
 #include <stdio.h>
@@ -31,6 +32,11 @@
  * @brief place réservée à une case tapée au clavier
  */
 #define TAILLE_SAISIE 10
+
+/**
+ * @brief renvoyé par gagnant quand la partie n'est pas finie
+ */
+#define PAS_DE_GAGNANT (-1)
 
 /**
  * @brief ce que peut contenir une case du plateau
@@ -96,10 +102,11 @@ typedef struct {
 void afficherRegles();
 int choisirMode();
 void deuxJoueurs(Joueur joueur[NB_JOUEURS]);
-void initialiserPartie(Partie *ptrPartie, int mode);
+void nommerJoueurs(Partie *ptrPartie, int mode);
+void initialiserPartie(Partie *ptrPartie);
 void afficherPlateau(const Partie *ptrPartie);
 void annoncerTour(const Partie *ptrPartie);
-void jouerPartie(Partie *ptrPartie);
+int jouerPartie(Partie *ptrPartie);
 
 bool estDansPlateau(int lig, int col);
 int direction(Contenu pion);
@@ -112,11 +119,17 @@ Coup saisirCoup(const Partie *ptrPartie);
 void jouerCoup(Partie *ptrPartie, Coup coup);
 void changerJoueur(Partie *ptrPartie);
 
+bool aAtteintDerniereRangee(const Partie *ptrPartie, Contenu pion);
+int compterPions(const Partie *ptrPartie, Contenu pion);
+int gagnant(const Partie *ptrPartie);
+void afficherGagnant(const Partie *ptrPartie, int vainqueur);
+bool demanderRejouer();
+
 /**
  * @brief point d'entrée du programme
  *
  * affiche les règles puis demande le mode de jeu et lit les prénoms
- * prépare la partie et la déroule jusqu'à ce qu'un joueur soit bloqué
+ * enchaîne les parties tant que les joueurs veulent rejouer
  *
  * @return 0 quand le programme s'est bien terminé
  */
@@ -125,12 +138,21 @@ int main() {
   afficheSep();
 
   Partie partie;
+  bool rejouer = true;
 
   afficherRegles();
 
   int mode = choisirMode();
-  initialiserPartie(&partie, mode);
-  jouerPartie(&partie);
+  nommerJoueurs(&partie, mode);
+
+  while (rejouer) {
+    initialiserPartie(&partie);
+
+    int vainqueur = jouerPartie(&partie);
+    afficherGagnant(&partie, vainqueur);
+
+    rejouer = demanderRejouer();
+  }
 
   afficheSep();
 
@@ -186,15 +208,37 @@ void deuxJoueurs(Joueur joueur[NB_JOUEURS]) {
 }
 
 /**
- * @brief prépare une partie neuve
+ * @brief donne son pion et son nom à chacun des 2 joueurs
  *
- * place les pions de départ remplit les deux joueurs et remet les compteurs
- * à zéro
+ * appelée une seule fois au lancement donc les prénoms servent pour toutes
+ * les parties enchaînées
  *
- * @param ptrPartie la partie à préparer
+ * @param ptrPartie la partie à remplir
  * @param mode 1 pour deux joueurs et 2 pour une partie contre l'ordinateur
  */
-void initialiserPartie(Partie *ptrPartie, int mode) {
+void nommerJoueurs(Partie *ptrPartie, int mode) {
+  // les blancs commencent donc ils sont le joueur d'indice 0
+  ptrPartie->joueur[0].pion = PION_BLANC;
+  ptrPartie->joueur[1].pion = PION_NOIR;
+  strcpy(ptrPartie->joueur[0].nom, "Joueur 1");
+  strcpy(ptrPartie->joueur[1].nom, "Ordinateur");
+
+  if (mode == 1) {
+    deuxJoueurs(ptrPartie->joueur);
+  } else {
+    printf("Vous jouez contre l'ordinateur \n");
+  }
+}
+
+/**
+ * @brief remet le plateau et les compteurs dans leur état de départ
+ *
+ * appelée au début de chaque partie donc une nouvelle partie repart d'un
+ * plateau neuf sans toucher aux prénoms
+ *
+ * @param ptrPartie la partie à préparer
+ */
+void initialiserPartie(Partie *ptrPartie) {
   for (int ligne = 0; ligne < TAILLE; ligne++) {
     for (int colonne = 0; colonne < TAILLE; colonne++) {
       // 2 premières lignes : noirs, 2 dernières : blancs, sinon vide
@@ -206,18 +250,6 @@ void initialiserPartie(Partie *ptrPartie, int mode) {
         ptrPartie->plateau[ligne][colonne] = CASE_VIDE;
       }
     }
-  }
-
-  // les blancs commencent donc ils sont le joueur d'indice 0
-  ptrPartie->joueur[0].pion = PION_BLANC;
-  ptrPartie->joueur[1].pion = PION_NOIR;
-  strcpy(ptrPartie->joueur[0].nom, "Joueur 1");
-  strcpy(ptrPartie->joueur[1].nom, "Ordinateur");
-
-  if (mode == 1) {
-    deuxJoueurs(ptrPartie->joueur);
-  } else {
-    printf("Vous jouez contre l'ordinateur \n");
   }
 
   ptrPartie->tour = 0;
@@ -510,17 +542,132 @@ void jouerCoup(Partie *ptrPartie, Coup coup) {
 void changerJoueur(Partie *ptrPartie) { ptrPartie->tour = 1 - ptrPartie->tour; }
 
 /**
- * @brief déroule la partie en faisant alterner les deux joueurs
+ * @brief dit si un pion a atteint la dernière rangée adverse
  *
- * la partie s'arrête quand le joueur dont c'est le tour n'a plus aucun coup
- * jouable
+ * les blancs visent la ligne 0 et les noirs la ligne TAILLE - 1
+ *
+ * @param ptrPartie la partie en cours
+ * @param pion PION_BLANC ou PION_NOIR
+ * @return true si un pion de ce camp est arrivé au bout et false sinon
+ */
+bool aAtteintDerniereRangee(const Partie *ptrPartie, Contenu pion) {
+  int rangee = 0;
+
+  if (direction(pion) == 1) {
+    rangee = TAILLE - 1;
+  }
+
+  for (int colonne = 0; colonne < TAILLE; colonne++) {
+    if (ptrPartie->plateau[rangee][colonne] == pion) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * @brief compte les pions d'un camp encore sur le plateau
+ *
+ * @param ptrPartie la partie en cours
+ * @param pion PION_BLANC ou PION_NOIR
+ * @return le nombre de pions de ce camp
+ */
+int compterPions(const Partie *ptrPartie, Contenu pion) {
+  int nb = 0;
+
+  for (int ligne = 0; ligne < TAILLE; ligne++) {
+    for (int colonne = 0; colonne < TAILLE; colonne++) {
+      if (ptrPartie->plateau[ligne][colonne] == pion) {
+        nb++;
+      }
+    }
+  }
+
+  return nb;
+}
+
+/**
+ * @brief cherche le gagnant de la partie
+ *
+ * un joueur gagne si un de ses pions atteint la dernière rangée adverse
+ * ou si son adversaire n'a plus de pions ou ne peut plus jouer
+ * il n'y a pas de match nul à Breakthrough
+ *
+ * @param ptrPartie la partie en cours
+ * @return l'indice du gagnant ou PAS_DE_GAGNANT si la partie continue
+ */
+int gagnant(const Partie *ptrPartie) {
+  int tour = ptrPartie->tour;
+  int autre = 1 - tour;
+
+  // le joueur qui vient de jouer est celui qui peut avoir atteint le bout
+  if (aAtteintDerniereRangee(ptrPartie, ptrPartie->joueur[autre].pion)) {
+    return autre;
+  }
+
+  if (aAtteintDerniereRangee(ptrPartie, ptrPartie->joueur[tour].pion)) {
+    return tour;
+  }
+
+  // le joueur du tour est mangé ou bloqué donc l'autre gagne
+  if (compterPions(ptrPartie, ptrPartie->joueur[tour].pion) == 0) {
+    return autre;
+  }
+
+  if (!peutJouer(ptrPartie)) {
+    return autre;
+  }
+
+  return PAS_DE_GAGNANT;
+}
+
+/**
+ * @brief annonce le résultat de la partie en nommant le gagnant
+ *
+ * @param ptrPartie la partie finie
+ * @param vainqueur l'indice du joueur qui a gagné
+ */
+void afficherGagnant(const Partie *ptrPartie, int vainqueur) {
+  Joueur joueur = ptrPartie->joueur[vainqueur];
+
+  printf("\n%s gagne la partie en %d coups\n", joueur.nom, ptrPartie->nbCoups);
+}
+
+/**
+ * @brief demande aux joueurs s'ils veulent une autre partie
+ *
+ * toute réponse qui ne commence pas par o arrête le programme
+ *
+ * @return true pour rejouer et false pour arrêter
+ */
+bool demanderRejouer() {
+  char reponse[TAILLE_SAISIE] = "";
+
+  printf("\nUne autre partie ? (o/n) : ");
+  scanf("%9s", reponse);
+
+  if (reponse[0] == 'o' || reponse[0] == 'O') {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * @brief déroule une partie en faisant alterner les deux joueurs
+ *
+ * s'arrête dès qu'un joueur a gagné
  *
  * @param ptrPartie la partie à dérouler
+ * @return l'indice du joueur qui a gagné
  */
-void jouerPartie(Partie *ptrPartie) {
+int jouerPartie(Partie *ptrPartie) {
+  int vainqueur = PAS_DE_GAGNANT;
+
   afficherPlateau(ptrPartie);
 
-  while (peutJouer(ptrPartie)) {
+  while (vainqueur == PAS_DE_GAGNANT) {
     annoncerTour(ptrPartie);
 
     Coup coup = saisirCoup(ptrPartie);
@@ -528,10 +675,9 @@ void jouerPartie(Partie *ptrPartie) {
     jouerCoup(ptrPartie, coup);
     afficherPlateau(ptrPartie);
     changerJoueur(ptrPartie);
+
+    vainqueur = gagnant(ptrPartie);
   }
 
-  Joueur bloque = ptrPartie->joueur[ptrPartie->tour];
-
-  printf("\n%s ne peut plus jouer, la partie est terminée après %d coups\n",
-         bloque.nom, ptrPartie->nbCoups);
+  return vainqueur;
 }
